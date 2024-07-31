@@ -62,10 +62,48 @@ export const catchPokemon = async (req: Request, res: Response) => {
 export const releasePokemon = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const pokemon = Pokemon.findByPk(id);
+    const pokemon = await Pokemon.findByPk(id);
     if (!pokemon) {
       return response(res, 500, "Pokemon not found", null);
     }
+
+    const number = Math.floor(Math.random() * 100) + 1;
+    const prime = isPrime(number);
+
+    if (prime) {
+      pokemon.destroy();
+      return response(res, 200, "Success to release pokemon", null);
+    }
+    return response(res, 500, "Failed to release pokemon", null);
+  } catch (error: any) {
+    return response(res, 500, error.message, null);
+  }
+}
+
+export const renamePokemon = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { nickname } = req.body;
+    const pokemon = await Pokemon.findByPk(id);
+    if (!pokemon) {
+      return response(res, 500, "Pokemon not found", null);
+    }
+
+    const fibonacci = pokemon.fibonacciIndex;
+    let newFibonacci = "";
+
+    if (fibonacci === "") {
+      newFibonacci = "0";
+    } else {
+      newFibonacci = `${fibonacci}-${getFibonacci(fibonacci)}`
+    }
+
+    pokemon.update({
+      nickname,
+      fibonacciIndex: newFibonacci
+    });
+
+    return response(res, 200, "Success to rename pokemon", pokemon);
   } catch (error: any) {
     return response(res, 500, error.message, null);
   }
